@@ -1,3 +1,6 @@
+<img src="https://img.shields.io/badge/made%20by-Manjooth-blue.svg" >
+<img src="https://img.shields.io/badge/java-14-red.svg">
+
 ### Implementation Decisions
 - Using `Map<Integer, Room>` in order to store `<Room Number, Room Object>` for easy access
   and quick retrieval of objects from the `Map`.
