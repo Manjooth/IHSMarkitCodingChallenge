@@ -4,6 +4,7 @@
 - Creating `Room` object to store room number and a `List` of the dates the room has been booked.
 - Do nothing with guest surname as we are currently not using this anywhere.
 - Creating `BookingException` to give a more meaningful error message.
+- Using TDD.
 
 ### Requirements:
 
