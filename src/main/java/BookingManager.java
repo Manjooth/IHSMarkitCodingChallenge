@@ -1,9 +1,9 @@
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BookingManager implements BookingManagerInterface
 {
-
     private final Map<Integer, Room> rooms = new HashMap();
 
     @Override
@@ -39,15 +39,10 @@ public class BookingManager implements BookingManagerInterface
     @Override
     public synchronized Iterable<Integer> getAvailableRooms(final LocalDate date)
     {
-        final List<Integer> availableRooms = new ArrayList<>();
-
-        for(Room room : rooms.values())
-        {
-            if(!room.getDatesBooked().contains(date))
-            {
-                availableRooms.add(room.getRoomId());
-            }
-        }
+        final List<Integer> availableRooms = rooms.values().stream()
+                .filter(room -> !room.getDatesBooked().contains(date))
+                .map(Room::getRoomId)
+                .collect(Collectors.toList());
 
         final Iterable<Integer> iterableRooms = availableRooms;
 
@@ -60,7 +55,6 @@ public class BookingManager implements BookingManagerInterface
         {
             return "Invalid - Room already exists";
         }
-
         rooms.put(roomNumber, new Room(roomNumber));
 
         return "SUCCESS";

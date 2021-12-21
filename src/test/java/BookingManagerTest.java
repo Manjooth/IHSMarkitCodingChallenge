@@ -2,7 +2,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class BookingManagerTest
 {
 
+    public static final LocalDate BOOKED_MONDAY_DATE = LocalDate.of(2021, 12, 20); // MONDAY
     private BookingManager bookingManager;
 
     @BeforeEach
@@ -19,7 +20,7 @@ class BookingManagerTest
     {
         bookingManager = new BookingManager();
         bookingManager.addRoom(1);
-        bookingManager.getRoom(1).addBookingDate(LocalDate.now());
+        bookingManager.getRoom(1).addBookingDate(BOOKED_MONDAY_DATE);
     }
 
     @Test
@@ -46,14 +47,14 @@ class BookingManagerTest
     @Test
     void shouldReturnFalseWhenRoomDoesNotExist()
     {
-        final boolean response = bookingManager.isRoomAvailable(100, LocalDate.now());
+        final boolean response = bookingManager.isRoomAvailable(100, BOOKED_MONDAY_DATE);
         assertFalse(response);
     }
 
     @Test
     void shouldReturnFalseWhenRoomIsNotAvailable()
     {
-        final boolean response = bookingManager.isRoomAvailable(1, LocalDate.now());
+        final boolean response = bookingManager.isRoomAvailable(1, BOOKED_MONDAY_DATE);
         assertFalse(response);
     }
 
@@ -61,7 +62,7 @@ class BookingManagerTest
     void shouldReturnTrueWhenRoomIsAvailable()
     {
         bookingManager.addRoom(2);
-        final boolean response = bookingManager.isRoomAvailable(2, LocalDate.now());
+        final boolean response = bookingManager.isRoomAvailable(2, BOOKED_MONDAY_DATE);
 
         assertTrue(response);
     }
@@ -70,7 +71,7 @@ class BookingManagerTest
     void shouldThrowErrorWhenRoomIsNotAvailableForBooking()
     {
         final BookingException thrown = assertThrows(BookingException.class, () -> {
-            bookingManager.addBooking("Kler", 1, LocalDate.now());
+            bookingManager.addBooking("Kler", 1, BOOKED_MONDAY_DATE);
         });
         assertEquals("Room 1 is already booked", thrown.getMessage());
     }
@@ -80,7 +81,7 @@ class BookingManagerTest
     {
         bookingManager.addRoom(2);
         assertDoesNotThrow(() ->
-                bookingManager.addBooking("Kler", 2, LocalDate.now())
+                bookingManager.addBooking("Kler", 2, BOOKED_MONDAY_DATE)
         );
     }
 
@@ -88,35 +89,43 @@ class BookingManagerTest
     void shouldBeAbleToAddBooking()
     {
         bookingManager.addRoom(101);
-        bookingManager.addBooking("Wallis", 101, LocalDate.now());
+        bookingManager.addBooking("Wallis", 101, BOOKED_MONDAY_DATE);
 
-        assertTrue(bookingManager.getRoom(101).getDatesBooked().contains(LocalDate.now()));
+        assertTrue(bookingManager.getRoom(101).getDatesBooked().contains(BOOKED_MONDAY_DATE));
     }
 
     @Test
-    void shouldReturnNoRoomsWhenGetAvailableRoomsAndNoneAreFree()
+    void shouldReturnNoRoomsAreAvailableWhenNonRoomsAreFree()
     {
-        assertEquals(Collections.emptyList(), bookingManager.getAvailableRooms(LocalDate.now()));
+        assertEquals(Collections.emptyList(), bookingManager.getAvailableRooms(BOOKED_MONDAY_DATE));
     }
 
     @Test
-    void shouldReturnRoomsWhenGetAvailableRoomsAndRoomsAreFree()
+    void shouldReturnRoomsAvailableWhenRoomsAreFree()
     {
         bookingManager.addRoom(2);
         bookingManager.addRoom(3);
 
-        final List<Integer> expected = new ArrayList<>();
-        expected.add(2);
-        expected.add(3);
-
+        final List<Integer> expected = Arrays.asList(2,3);
         final Iterable<Integer> expectedIterable = expected;
 
-        assertIterableEquals(expectedIterable, bookingManager.getAvailableRooms(LocalDate.now()));
+        assertIterableEquals(expectedIterable, bookingManager.getAvailableRooms(BOOKED_MONDAY_DATE));
     }
 
     @Test
-    void shouldBeThreadSafe() throws InterruptedException
+    void shouldReturnRoomAvailableWhenBookingIsFreeBetweenTwoDates()
     {
+        bookingManager.getRoom(1).addBookingDate(LocalDate.of(2021, 12, 22)); // Monday already booked, also book Wednesday
+
+        final List<Integer> expected = Arrays.asList(1);
+        final Iterable<Integer> expectedIterable = expected;
+
+        assertTrue(bookingManager.isRoomAvailable(1, LocalDate.of(2021, 12, 21))); // Try and book Tuesday
+        assertIterableEquals(expectedIterable, bookingManager.getAvailableRooms(LocalDate.of(2021, 12, 21)));
+    }
+
+    @Test
+    void shouldBeThreadSafe() throws InterruptedException {
         final BookingManager bookingManagerThreads = new BookingManager();
 
         final ThreadSafeHelper thread1 = new ThreadSafeHelper(bookingManagerThreads);
@@ -131,9 +140,8 @@ class BookingManagerTest
 
         IntStream.range(0, 10).forEach(i -> {
             // expected, actual
-            assertFalse(bookingManagerThreads.isRoomAvailable(i, LocalDate.now()));
+            assertFalse(bookingManagerThreads.isRoomAvailable(i, BOOKED_MONDAY_DATE));
         });
 
     }
-
 }

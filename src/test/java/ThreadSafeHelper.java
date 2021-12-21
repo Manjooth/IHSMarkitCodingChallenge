@@ -18,7 +18,7 @@ public class ThreadSafeHelper extends Thread
         IntStream.range(0, 10).forEach(i -> {
             bookingManager.addRoom(i);
             System.out.println(i);
-            bookingManager.addBooking(name, i, LocalDate.now());
+            bookingManager.addBooking(name, i, LocalDate.of(2021, 12, 20));
         });
     }
 

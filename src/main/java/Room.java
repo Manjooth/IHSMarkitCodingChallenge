@@ -1,11 +1,12 @@
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Room
 {
 
     private final int roomId;
-    private final ArrayList<LocalDate> datesBooked = new ArrayList<>();
+    private final List<LocalDate> datesBooked = new ArrayList<>();
 
     public Room(final int roomId)
     {
@@ -17,7 +18,7 @@ public class Room
         return roomId;
     }
 
-    public ArrayList<LocalDate> getDatesBooked()
+    public List<LocalDate> getDatesBooked()
     {
         return datesBooked;
     }
