@@ -1,13 +1,18 @@
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class BookingManager implements BookingManagerInterface
 {
-    private final Map<Integer, Room> rooms = new HashMap();
+    /**
+     ConcurrentHashMap class is thread-safe --> multiple threads
+     can operate on a single object without any complications
+     **/
+    private final Map<Integer, Room> rooms = new ConcurrentHashMap<>();
 
     @Override
-    public synchronized boolean isRoomAvailable(final Integer room, final LocalDate date)
+    public boolean isRoomAvailable(final Integer room, final LocalDate date)
     {
         if(!rooms.containsKey(room))
         {
@@ -26,7 +31,7 @@ public class BookingManager implements BookingManagerInterface
     }
 
     @Override
-    public synchronized void addBooking(final String guest, final Integer room, final LocalDate date)
+    public void addBooking(final String guest, final Integer room, final LocalDate date)
     {
         if(!isRoomAvailable(room, date))
         {
