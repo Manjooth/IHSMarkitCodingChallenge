@@ -106,9 +106,7 @@ class BookingManagerTest
         bookingManager.addRoom(2);
         bookingManager.addRoom(3);
 
-        final List<Integer> expected = Arrays.asList(2,3);
-        final Iterable<Integer> expectedIterable = expected;
-
+        final Iterable<Integer> expectedIterable = Arrays.asList(2,3);
         assertIterableEquals(expectedIterable, bookingManager.getAvailableRooms(BOOKED_MONDAY_DATE));
     }
 
@@ -117,9 +115,7 @@ class BookingManagerTest
     {
         bookingManager.getRoom(1).addBookingDate(LocalDate.of(2021, 12, 22)); // Monday already booked, also book Wednesday
 
-        final List<Integer> expected = Arrays.asList(1);
-        final Iterable<Integer> expectedIterable = expected;
-
+        final Iterable<Integer> expectedIterable = Arrays.asList(1);
         assertTrue(bookingManager.isRoomAvailable(1, LocalDate.of(2021, 12, 21))); // Try and book Tuesday
         assertIterableEquals(expectedIterable, bookingManager.getAvailableRooms(LocalDate.of(2021, 12, 21)));
     }
