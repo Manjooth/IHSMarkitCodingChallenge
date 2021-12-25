@@ -42,7 +42,7 @@ public class BookingManager implements BookingManagerInterface
     }
 
     @Override
-    public synchronized Iterable<Integer> getAvailableRooms(final LocalDate date)
+    public Iterable<Integer> getAvailableRooms(final LocalDate date)
     {
         final List<Integer> availableRooms = rooms.values().stream()
                 .filter(room -> !room.getDatesBooked().contains(date))
@@ -68,6 +68,11 @@ public class BookingManager implements BookingManagerInterface
     public Room getRoom(final int roomNumber)
     {
         return rooms.get(roomNumber);
+    }
+
+    public int getSize()
+    { // method to help testing
+        return rooms.size();
     }
 
 }

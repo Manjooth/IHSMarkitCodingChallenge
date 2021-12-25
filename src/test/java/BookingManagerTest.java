@@ -4,7 +4,9 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -121,7 +123,8 @@ class BookingManagerTest
     }
 
     @Test
-    void shouldBeThreadSafe() throws InterruptedException {
+    void shouldBeThreadSafe() throws InterruptedException
+    {
         final BookingManager bookingManagerThreads = new BookingManager();
 
         final ThreadSafeHelper thread1 = new ThreadSafeHelper(bookingManagerThreads);
@@ -130,14 +133,38 @@ class BookingManagerTest
 
         thread1.start(); thread2.start(); thread3.start();
 
-        while(thread1.isAlive() || thread2.isAlive() || thread3.isAlive()){
+        while(thread1.isAlive() || thread2.isAlive() || thread3.isAlive())
+        {
             Thread.sleep(10);
         }
 
-        IntStream.range(0, 10).forEach(i -> {
+        IntStream.range(0, 10).forEach(i ->
+        {
             // expected, actual
             assertFalse(bookingManagerThreads.isRoomAvailable(i, BOOKED_MONDAY_DATE));
         });
+    }
 
+    @Test
+    void shouldMakeConcurrentCalls() throws InterruptedException
+    {
+        int numberOfThreads = 40;
+        ExecutorService service = Executors.newFixedThreadPool(40);
+        CountDownLatch latch = new CountDownLatch(numberOfThreads);
+        BookingManager concurrentBookingManager = new BookingManager();
+
+        for (int i = 0; i < numberOfThreads; i++)
+        {
+            final int finalI = i;
+            service.execute(() ->
+            {
+                concurrentBookingManager.addRoom(finalI);
+                System.out.println(finalI);
+                concurrentBookingManager.addBooking("name", finalI, LocalDate.of(2021, 12, 20));
+                latch.countDown();
+            });
+        }
+        latch.await();
+        assertEquals(numberOfThreads, concurrentBookingManager.getSize());
     }
 }
